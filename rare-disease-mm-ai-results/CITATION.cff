@@ -1,0 +1,9 @@
+
+cff-version: 1.2.0
+message: "If you use these results, please cite the accompanying manuscript."
+title: "Rare Disease Multimodal AI — Results"
+authors:
+  - family-names: "Adlani"
+    given-names: "Riya"
+date-released: 2025-08-14
+version: "1.0.0"

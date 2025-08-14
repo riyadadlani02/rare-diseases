@@ -1,0 +1,17 @@
+
+data:
+  train_csv: /path/to/mimic_iv_notes_train.csv    # columns: text,label
+  val_csv:   /path/to/mimic_iv_notes_val.csv
+  test_csv:  /path/to/mimic_iv_notes_test.csv
+  max_length: 256
+
+training:
+  batch_size: 16
+  epochs: 5
+  lr: 2e-5
+  weight_decay: 0.01
+  seed: 42
+
+model:
+  name: dmis-lab/biobert-v1.1   # or microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext, bluebert
+  num_labels: 2

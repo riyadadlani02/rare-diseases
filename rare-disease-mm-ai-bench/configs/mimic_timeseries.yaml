@@ -1,0 +1,14 @@
+
+data:
+  train_parquet: /path/to/mimic_timeseries_train.parquet  # columns: pid, time, feature_*, label
+  val_parquet:   /path/to/mimic_timeseries_val.parquet
+  test_parquet:  /path/to/mimic_timeseries_test.parquet
+
+training:
+  batch_size: 32
+  epochs: 15
+  lr: 1e-3
+  weight_decay: 1e-4
+  max_len: 256
+  hidden: 256
+  seed: 42

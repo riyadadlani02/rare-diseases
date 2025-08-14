@@ -1,0 +1,13 @@
+
+data:
+  train_dir: /path/to/mimic_cxr/train   # JPGs or PNGs
+  val_dir:   /path/to/mimic_cxr/val
+  test_dir:  /path/to/mimic_cxr/test
+
+training:
+  batch_size: 16
+  epochs: 10
+  lr: 1e-3
+  weight_decay: 1e-4
+  img_size: 224
+  seed: 42
