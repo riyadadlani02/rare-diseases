@@ -1,4 +1,40 @@
+"""
+This script trains and evaluates a Convolutional Neural Network (CNN) for image classification.
 
+The script is designed to perform the following steps:
+1.  **Model Initialization**: It uses a pre-trained EfficientNet-B0 model from `torchvision`.
+    The final classifier layer of the model is replaced with a new linear layer to match the
+    number of classes in the target dataset.
+
+2.  **Configuration Management**: All settings, including file paths, image size, learning rate,
+    and number of epochs, are managed through an external YAML configuration file. This
+    allows for flexible experimentation without changing the source code.
+
+3.  **Data Loading and Preprocessing**:
+    -   It defines a series of image transformations using `torchvision.transforms`, including
+      resizing, converting to grayscale (and duplicating to 3 channels to match the
+      pre-trained model's input), and converting to PyTorch tensors.
+    -   It uses `datasets.ImageFolder` to load training and validation images from
+      specified directories, where each subdirectory corresponds to a class.
+    -   `DataLoader` is used to create batches of data for training and validation, with
+      support for shuffling and parallel data loading.
+
+4.  **Training Loop**:
+    -   The model is trained using the AdamW optimizer and Cross-Entropy Loss.
+    -   The script iterates through the training data for a specified number of epochs.
+    -   After each epoch, the model's performance is evaluated on the validation set.
+
+5.  **Evaluation**:
+    -   The `evaluate` function computes standard classification metrics: accuracy, macro F1-score,
+      and AUROC.
+    -   The validation performance is printed to the console at the end of each epoch to
+      monitor training progress.
+
+To run the script, a path to a configuration file must be provided via the command line.
+
+Example Usage:
+    python train_cnn_imaging.py --config path/to/your/config.yaml
+"""
 import argparse, os, yaml, numpy as np, torch
 from torch import nn
 from torchvision import models, transforms, datasets

@@ -1,4 +1,45 @@
+"""
+This script trains and evaluates a transformer-based model for text classification.
 
+The script is designed to perform the following key functions:
+1.  **Custom Dataset Handling**: It defines a `TextDS` class that inherits from
+    `torch.utils.data.Dataset`. This class is responsible for:
+    -   Reading text data and labels from a CSV file, with configurable column names.
+    -   Using a Hugging Face `AutoTokenizer` to tokenize the text on the fly, with
+      truncation and padding to a specified maximum length.
+
+2.  **Model Loading and Configuration**:
+    -   It uses `AutoModelForSequenceClassification` to load a pre-trained transformer
+      model (e.g., BioBERT) from the Hugging Face Hub.
+    -   All hyperparameters, file paths, and training settings are managed through
+      command-line arguments, allowing for flexible experimentation.
+
+3.  **Training Loop**:
+    -   The model is trained using the AdamW optimizer.
+    -   A linear learning rate scheduler with a warm-up period is used to adjust the
+      learning rate during training, which often improves stability and performance.
+    -   Gradient clipping is applied to prevent exploding gradients.
+    -   A `tqdm` progress bar is used to visualize training progress for each epoch.
+
+4.  **Evaluation and Confidence Intervals**:
+    -   After each training epoch, the `evaluate` function is called to assess the model's
+      performance on a validation set.
+    -   It calculates standard classification metrics: accuracy, macro F1-score, and AUROC.
+    -   It also computes 95% confidence intervals for these metrics using a bootstrap
+      resampling method from `utils.bootstrap_utils`.
+
+5.  **Saving Results**:
+    -   The best performing model checkpoint (based on macro F1-score) is saved.
+    -   The final validation metrics, including confidence intervals, are saved to a
+      JSON file in the specified output directory.
+
+To run the script, you must provide paths to the training and validation CSV files.
+
+Example Usage:
+    python train_text_model.py --train_csv path/to/train.csv --val_csv path/to/val.csv \\
+                               --model_name dmis-lab/biobert-v1.1 \\
+                               --out_dir results/text_model_run1
+"""
 import argparse, os, json, numpy as np, pandas as pd, torch
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score

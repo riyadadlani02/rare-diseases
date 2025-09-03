@@ -1,4 +1,47 @@
+"""
+This script trains and evaluates a Long Short-Term Memory (LSTM) neural network to
+predict primary diagnosis categories from patient clinical event sequences, using data
+from the MIMIC-IV clinical database.
 
+The script's workflow is as follows:
+1.  **Data Loading and Preprocessing**:
+    -   `read_gz_csv`: A helper function to read gzipped CSV files.
+    -   `build_labels`: Reads the diagnoses data, identifies the top K most frequent
+      primary diagnosis categories (based on ICD codes), and assigns a label to each
+      subject. This creates a multi-class classification task.
+    -   `build_sequences`: Reads the clinical events data (chartevents), converts the
+      time-ordered events for each patient into integer sequences, builds a vocabulary,
+      and pads or truncates the sequences to a fixed length.
+
+2.  **PyTorch Dataset**:
+    -   A `SeqDS` class is defined, inheriting from `torch.utils.data.Dataset`, to wrap
+      the processed sequences and labels into a format suitable for PyTorch's DataLoader.
+
+3.  **Model Architecture**:
+    -   An `LSTMNet` class defines a stacked LSTM model using PyTorch. It includes an
+      embedding layer, two LSTM layers with dropout for regularization, and a final
+      fully connected layer for classification.
+
+4.  **Training and Evaluation**:
+    -   The script takes command-line arguments for data paths, hyperparameters (like
+      learning rate, epochs), and an output directory.
+    -   It splits the data into training and validation sets.
+    -   The model is trained using the AdamW optimizer and Cross-Entropy Loss. A progress
+      bar from `tqdm` is used to monitor training.
+    -   After each epoch, the model is evaluated on the validation set.
+    -   Performance is measured using accuracy, macro F1-score, and AUROC.
+    -   Confidence intervals for these metrics are calculated using a bootstrap method.
+
+5.  **Saving Results**:
+    -   The best performing model checkpoint (based on macro F1-score) is saved.
+    -   The final validation metrics, including confidence intervals, are saved to a
+      JSON file in the specified output directory.
+
+Example Usage:
+    python train_lstm_from_mimic_demo.py --chartevents path/to/chartevents.csv.gz \\
+                                         --diagnoses path/to/diagnoses_icd.csv.gz \\
+                                         --out_dir results/lstm_mimic_run1
+"""
 import argparse, os, json, gzip, numpy as np, pandas as pd, torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader

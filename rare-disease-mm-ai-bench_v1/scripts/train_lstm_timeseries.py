@@ -1,4 +1,37 @@
+"""
+This script trains and evaluates a Long Short-Term Memory (LSTM) model for time-series classification.
 
+The script is structured to perform the following key tasks:
+1.  **Custom Dataset Loading**: It defines a `TSDataset` class that inherits from `torch.utils.data.Dataset`.
+    This class is responsible for:
+    -   Reading time-series data from a Parquet file.
+    -   Reshaping the flat tabular data into sequences of a specified maximum length (`max_len`).
+    -   Extracting patient IDs, features (x), and labels (y).
+    -   Converting the data into PyTorch tensors suitable for model training.
+
+2.  **Model Architecture**: It defines an `LSTMHead` model, which consists of:
+    -   A two-layer LSTM network that processes the input sequences.
+    -   A fully connected (FC) head that takes the final hidden state of the LSTM and
+      passes it through a small MLP (with ReLU activation and dropout) to produce
+      the final classification logits.
+
+3.  **Configuration Management**: The script uses a YAML configuration file to manage all
+    hyperparameters and settings, such as file paths, sequence length, learning rate,
+    and number of epochs. This makes it easy to run experiments without modifying the code.
+
+4.  **Training and Evaluation**:
+    -   It sets up `DataLoader` for both training and validation sets to handle batching
+      and shuffling.
+    -   The model is trained using the AdamW optimizer and Cross-Entropy Loss.
+    -   After each training epoch, the `evaluate` function is called to compute performance
+      metrics (accuracy, macro F1-score, and AUROC) on the validation set.
+    -   The validation results are printed to the console to monitor training progress.
+
+To run the script, a path to a configuration file must be provided as a command-line argument.
+
+Example Usage:
+    python train_lstm_timeseries.py --config path/to/your/config.yaml
+"""
 import argparse, yaml, numpy as np, pandas as pd, torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader

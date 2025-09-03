@@ -1,4 +1,38 @@
+"""
+This script trains and evaluates a multimodal fusion model for classification.
 
+The script performs the following steps:
+1.  **Model Definition**: It defines a simple Multi-Layer Perceptron (MLP) called `FusionMLP`
+    that serves as the fusion model. This MLP takes concatenated feature vectors from
+    different modalities as input and produces classification logits.
+
+2.  **Configuration Loading**: It uses a YAML configuration file to manage all hyperparameters,
+    file paths, and training settings. This allows for easy experimentation without
+    modifying the code.
+
+3.  **Data Loading and Preparation**:
+    -   It loads pre-computed feature vectors for different modalities (e.g., text, imaging,
+        time-series) from NumPy files (`.npy`).
+    -   The features for training and validation sets are concatenated to form single
+      multimodal feature vectors.
+    -   Labels are loaded and aligned with the corresponding feature sets.
+    -   PyTorch `TensorDataset` and `DataLoader` are created to handle batching and shuffling.
+
+4.  **Training Loop**:
+    -   The `FusionMLP` model is trained using an AdamW optimizer and CrossEntropyLoss.
+    -   The script iterates through the training data for a specified number of epochs.
+    -   After each epoch, the model's performance is evaluated on the validation set.
+
+5.  **Evaluation**:
+    -   The `evaluate` function calculates key classification metrics: accuracy, macro F1-score,
+      and AUROC (Area Under the Receiver Operating Characteristic curve).
+    -   Validation performance is printed to the console after each epoch.
+
+To run the script, a configuration file must be provided via the command line.
+
+Example Usage:
+    python run_multimodal_fusion.py --config path/to/your/config.yaml
+"""
 import argparse, yaml, numpy as np, torch
 from torch import nn
 from torch.utils.data import TensorDataset, DataLoader

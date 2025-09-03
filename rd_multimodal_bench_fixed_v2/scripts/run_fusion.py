@@ -1,4 +1,47 @@
+"""
+This script trains and evaluates a multimodal fusion model for classification.
 
+The script is designed to perform the following steps:
+1.  **Model Definition**: It defines a simple Multi-Layer Perceptron (MLP) called `FusionMLP`.
+    This model serves as the fusion layer, taking concatenated feature vectors from
+    different modalities (e.g., text, imaging, time-series) as input and producing
+    classification logits.
+
+2.  **Argument Parsing**: It uses `argparse` to handle command-line arguments, allowing
+    users to specify paths to the pre-computed feature files for each modality,
+    as well as training hyperparameters like epochs, batch size, and learning rate.
+
+3.  **Data Loading and Preparation**:
+    -   It loads pre-computed feature vectors for text, imaging, and time-series modalities
+      from NumPy (`.npy`) files.
+    -   The features for the training and validation sets are concatenated to form single,
+      powerful multimodal feature vectors.
+    -   Labels are loaded and converted to PyTorch tensors.
+    -   PyTorch `TensorDataset` and `DataLoader` are used to create efficient data pipelines
+      for batching and shuffling.
+
+4.  **Training and Evaluation Loop**:
+    -   The `FusionMLP` model is trained using the AdamW optimizer and Cross-Entropy Loss.
+    -   The script iterates through the training data for a specified number of epochs.
+    -   After each epoch, the model is evaluated on the validation set.
+    -   The best model checkpoint (based on macro F1-score) is saved.
+
+5.  **Metrics and Confidence Intervals**:
+    -   During evaluation, it calculates key classification metrics: accuracy, macro F1-score,
+      and multi-class AUROC.
+    -   It also computes 95% confidence intervals for these metrics using a bootstrap
+      resampling method from `utils.bootstrap_utils`.
+    -   The final metrics and CIs are saved to a JSON file for later analysis.
+
+To run the script, you must provide paths to all the required feature and label files.
+
+Example Usage:
+    python run_fusion.py --text_train path/to/text_train.npy --text_val path/to/text_val.npy \\
+                         --img_train path/to/img_train.npy --img_val path/to/img_val.npy \\
+                         --ts_train path/to/ts_train.npy --ts_val path/to/ts_val.npy \\
+                         --y_train path/to/y_train.npy --y_val path/to/y_val.npy \\
+                         --out_dir results/fusion_run1
+"""
 import argparse, os, json, numpy as np, torch
 from torch import nn
 from torch.utils.data import TensorDataset, DataLoader

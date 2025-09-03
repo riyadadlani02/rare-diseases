@@ -1,4 +1,43 @@
+"""
+This script trains and evaluates a Convolutional Neural Network (CNN) for image classification.
 
+The script is designed to perform the following steps:
+1.  **Model Initialization**: It uses a pre-trained EfficientNet-B0 model from `torchvision`.
+    The final classifier layer is replaced with a new sequential layer containing dropout
+    and a linear layer to match the number of classes in the target dataset.
+
+2.  **Argument Parsing**: It uses `argparse` to manage all command-line arguments,
+    including paths to data directories, training hyperparameters (epochs, batch size,
+    learning rate), and output settings.
+
+3.  **Data Loading and Preprocessing**:
+    -   It defines a series of image transformations using `torchvision.transforms`,
+      including resizing, converting to grayscale (and duplicating to 3 channels to
+      match the pre-trained model's input), and converting to PyTorch tensors.
+    -   It uses `datasets.ImageFolder` to load training and validation images from
+      specified directories, where each subdirectory corresponds to a class.
+    -   `DataLoader` is used to create batches of data for training and validation, with
+      support for shuffling and parallel data loading.
+
+4.  **Training and Evaluation Loop**:
+    -   The model is trained using the AdamW optimizer and Cross-Entropy Loss.
+    -   The script iterates through the training data for a specified number of epochs.
+    -   After each epoch, the model's performance is evaluated on the validation set.
+    -   The best model checkpoint (based on macro F1-score) is saved.
+
+5.  **Metrics and Confidence Intervals**:
+    -   During evaluation, it calculates key classification metrics: accuracy, macro F1-score,
+      and multi-class AUROC.
+    -   It also computes 95% confidence intervals for these metrics using a bootstrap
+      resampling method from `utils.bootstrap_utils`.
+    -   The final metrics and CIs are saved to a JSON file for later analysis.
+
+To run the script, you must provide paths to the training and validation data directories.
+
+Example Usage:
+    python train_cnn_imaging.py --train_dir path/to/train_data --val_dir path/to/val_data \\
+                                --out_dir results/cnn_run1
+"""
 import argparse, os, json, numpy as np, torch
 from torch import nn
 from torchvision import models, transforms, datasets
