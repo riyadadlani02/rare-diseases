@@ -40,6 +40,8 @@ Example Usage:
 """
 import argparse, os, json, numpy as np, torch
 from torch import nn
+import cv2
+from PIL import Image
 from torchvision import models, transforms, datasets
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
@@ -65,6 +67,29 @@ def evaluate(model, dl, device):
     try: auc=roc_auc_score(y_true,y_prob)
     except: auc=float('nan')
     return acc,f1,auc,y_true,y_prob,y_pred
+    
+class MedicalImagePreprocess:
+    def __init__(self, img_size=224):
+        self.img_size = img_size
+        self.to_tensor = transforms.ToTensor()
+
+    def __call__(self, img):
+        # Convert to grayscale
+        img = img.convert("L")
+        # CLAHE for contrast enhancement
+        np_img = np.array(img)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        np_img = clahe.apply(np_img)
+        # Gaussian smoothing for denoising
+        np_img = cv2.GaussianBlur(np_img, (3,3), 0)
+        # Intensity normalization
+        np_img = cv2.normalize(np_img, None, 0, 255, cv2.NORM_MINMAX)
+        # Resize and convert to 3 channels
+        img = Image.fromarray(np_img)
+        img = img.resize((self.img_size, self.img_size))
+        img = img.convert("RGB")
+        return self.to_tensor(img)
+
 
 def main():
     ap=argparse.ArgumentParser()
@@ -82,17 +107,9 @@ def main():
     os.makedirs(args.out_dir, exist_ok=True)
     torch.manual_seed(args.seed); np.random.seed(args.seed)
 
-    tfm_train = transforms.Compose([
-        transforms.Resize((args.img_size,args.img_size)),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor()
-    ])
-    tfm_val = transforms.Compose([
-        transforms.Resize((args.img_size,args.img_size)),
-        transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor()
-    ])
+    tfm_train = MedicalImagePreprocess(img_size=args.img_size)
+    tfm_val = MedicalImagePreprocess(img_size=args.img_size)
+
 
     ds_tr=datasets.ImageFolder(args.train_dir, transform=tfm_train)
     ds_va=datasets.ImageFolder(args.val_dir, transform=tfm_val)
